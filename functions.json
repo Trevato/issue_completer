@@ -1,0 +1,171 @@
+[
+    {
+        "name": "get_open_issues",
+        "description": "Get a list of open issues in the repository",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    },
+    {
+        "name": "get_issue",
+        "description": "Get all information on a specific issue. Will contain a comment thread which may help with context.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "issue_number": {
+                    "type": "integer",
+                    "description": "The issue number (returned from get_open_issues)"
+                }
+            },
+            "required": [
+                "issue_number"
+            ]
+        }
+    },
+    {
+        "name": "get_root_directory_contents",
+        "description": "Get all of the contents of the root directory of the repository",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    },
+    {
+        "name": "get_specific_content_file",
+        "description": "Return contents of a file. This is useful when examining a folder structure.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "type": "string",
+                    "description": "The file path, eg. frontend/src/components"
+                }
+            },
+            "required": [
+                "file_path"
+            ]
+        }
+    },
+    {
+        "name": "decode_content_file",
+        "description": "Return actual contents of a file",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "type": "string",
+                    "description": "The file path, e.g. README.md"
+                }
+            },
+            "required": [
+                "file_path"
+            ]
+        }
+    },
+    {
+        "name": "get_file_sha",
+        "description": "Request the SHA of a file in the repository. This is GitHub's unique identifier for a file and is used in other functions.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "type": "string",
+                    "description": "The file path, e.g. README.md"
+                }
+            },
+            "required": [
+                "file_path"
+            ]
+        }
+    },
+    {
+        "name": "create_new_file",
+        "description": "Create a new file in the repository",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "type": "string",
+                    "description": "The file path, e.g. test.txt"
+                },
+                "commit_message": {
+                    "type": "string",
+                    "description": "The commit message, e.g. test"
+                },
+                "file_content": {
+                    "type": "string",
+                    "description": "The file content, e.g. test"
+                }
+            },
+            "required": [
+                "file_path",
+                "commit_message",
+                "file_content"
+            ]
+        }
+    },
+    {
+        "name": "update_file",
+        "description": "Update a file in the repository. This will replace the old file content with the new file content.It uses a .replace() call so old_file_content must be an exact match.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "type": "string",
+                    "description": "The file path"
+                },
+                "commit_message": {
+                    "type": "string",
+                    "description": "The commit message"
+                },
+                "old_file_content": {
+                    "type": "string",
+                    "description": "The file content to be replaced"
+                },
+                "new_file_content": {
+                    "type": "string",
+                    "description": "The new file content"
+                }
+            },
+            "required": [
+                "file_path",
+                "commit_message",
+                "old_file_content",
+                "new_file_content"
+            ]
+        }
+    },
+    {
+        "name": "delete_file",
+        "description": "Delete a file in the repository",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "type": "string",
+                    "description": "The file path, e.g. test.txt"
+                },
+                "commit_message": {
+                    "type": "string",
+                    "description": "The commit message, e.g. remove test"
+                }
+            },
+            "required": [
+                "file_path",
+                "commit_message"
+            ]
+        }
+    },
+    {
+        "name": "clear_conversation",
+        "description": "Clear the current conversation. Useful when the context should be cleared.",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    }
+]
