@@ -5,6 +5,7 @@ import openai
 from dotenv import load_dotenv
 from github import Github
 from github import Auth
+from txtai.embeddings import Embeddings
 
 
 load_dotenv()
@@ -26,16 +27,7 @@ class IssueCompleter:
         self.user_system_prompt = user_system_prompt
 
         self.available_functions = {
-            "get_open_issues": self.get_open_issues,
-            "get_issue": self.get_issue,
-            "get_root_directory_contents": self.get_root_directory_contents,
-            "get_specific_content_file": self.get_specific_content_file,
-            "decode_content_file": self.decode_content_file,
-            "create_new_file": self.create_new_file,
-            "update_file": self.update_file,
-            "delete_file": self.delete_file,
-            "clear_conversation": self.clear_conversation,
-            "get_file_sha": self.get_file_sha,
+            "take_action": self.take_action,
         }
 
         with open("functions.json") as json_functions:
@@ -77,75 +69,21 @@ class IssueCompleter:
         else:
             self.messages.append(response_message)
 
-    def get_open_issues(self):
-        repo = self.g.get_repo(self.repo)
-        open_issues = repo.get_issues(state="open")
-        return [(issue.title, issue.number) for issue in open_issues]
+    def take_action(self, prompt):
+        available_functions = {
+            "get_open_issues": "Returns a list of open issues on the repo",
+            "get_issue": "Returns more information on a specific issue",
+            "get_specific_content_file": "Return the contents of a file or directory",
+            "decode_content_file": "Return the actual contents of a file",
+            "create_new_file": "Creates a new file",
+            "update_file": "Edit an existing file",
+            "delete_file": "Delete a file",
+        }
 
-    def get_issue(self, issue_number):
-        repo = self.g.get_repo(self.repo)
-        issue = repo.get_issue(number=issue_number)
-        return str(issue)
+        embeddings = Embeddings({"path": "sentence-transformers/all-MiniLM-L6-v2"})
+        embeddings.index(list(available_functions))
 
-    def get_root_directory_contents(self):
-        repo = self.g.get_repo(self.repo)
-        return repo.get_contents("")
-
-    def get_specific_content_file(self, file_path):
-        repo = self.g.get_repo(self.repo)
-        return repo.get_contents(file_path)
-
-    def decode_content_file(self, file_path):
-        repo = self.g.get_repo(self.repo)
-        return repo.get_contents(file_path).decoded_content.decode("utf-8")  # type: ignore
-
-    def get_file_sha(self, file_path):
-        repo = self.g.get_repo(self.repo)
-        return repo.get_contents(file_path).sha  # type: ignore
-
-    # TODO: change author to bot
-    def create_new_file(self, file_path, commit_message, file_content):
-        repo = self.g.get_repo(self.repo)
-        return repo.create_file(
-            file_path, commit_message, file_content, self.bot_branch
-        )
-
-    # TODO: get_contents returns either a ContentFile object or a list of them which is the reason for the type ignoring. This should be changed to be safer
-    def update_file(
-        self, file_path, commit_message, old_file_content, new_file_content
-    ):
-        repo = self.g.get_repo(self.repo)
-        contents = repo.get_contents(file_path)
-
-        # TODO: This is a hacky way to replace the old file content with the new file content. This should be changed to be safer
-        new_contents = contents.decoded_content.decode("utf-8").replace(  # type: ignore
-            old_file_content, new_file_content
-        )
-        repo.update_file(
-            contents.path,  # type: ignore
-            commit_message,
-            new_contents,
-            contents.sha,  # type: ignore
-            branch=self.bot_branch,
-        )
-
-    # TODO: get_contents returns either a ContentFile object or a list of them which is the reason for the type ignoring. This should be changed to be safer
-    def delete_file(self, file_path, commit_message):
-        repo = self.g.get_repo(self.repo)
-        contents = repo.get_contents(file_path)
-        repo.delete_file(
-            contents.path,  # type: ignore
-            commit_message,
-            contents.sha,  # type: ignore
-            branch=self.bot_branch,
-        )
-
-    def clear_conversation(self):
-        self.messages = [
-            {"role": "system", "content": main_system_prompt},
-            {"role": "user", "content": self.user_system_prompt},
-        ]
-
+        return embeddings.search(prompt, 1)
 
 from termcolor import colored
 
