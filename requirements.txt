@@ -2,3 +2,4 @@ openai
 pygithub
 python-dotenv
 termcolor
+txtai
